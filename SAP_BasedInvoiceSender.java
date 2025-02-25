@@ -1,26 +1,29 @@
 package org.example.Assignment;
 
-import org.junit.jupiter.api.Test;
-
+import java.util.ArrayList;
 import java.util.List;
 
-// Class responsible for sending low-valued invoices to the SAP system
 public class SAP_BasedInvoiceSender {
 
-    private final FilterInvoice filter;  // Dependency for filtering invoices
-    private final SAP sap;  // Dependency for sending invoices to the SAP system
+    private final FilterInvoice filter;
+    private final SAP sap;
 
-    // Constructor that uses dependency injection to initialize the filter and sap objects
     public SAP_BasedInvoiceSender(FilterInvoice filter, SAP sap) {
         this.filter = filter;
         this.sap = sap;
     }
 
-    // Method to send all low-valued invoices to the SAP system
-    public void sendLowValuedInvoices() {
-        List<Invoice> lowValuedInvoices = filter.lowValueInvoices();
-        for (Invoice invoice : lowValuedInvoices) {  // Iterates through each invoice in the list
-            sap.send(invoice);  // Sends the current invoice to the SAP system
+    public List<Invoice> sendLowValuedInvoices() { // Now returns a list of failed invoices
+        List<Invoice> lowValuedInvoices = filter.lowValueInvoices(); // Get low-valued invoices
+        List<Invoice> failedInvoices = new ArrayList<>(); // Store failed invoices
+
+        for (Invoice invoice : lowValuedInvoices) {
+            try {
+                sap.send(invoice); // Try sending invoice
+            } catch (Exception e) {
+                failedInvoices.add(invoice); // If failed, store it
+            }
         }
+        return failedInvoices; // Return failed invoices
     }
 }
